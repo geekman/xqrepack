@@ -5,6 +5,8 @@ These scripts allow you to modify the *Xiaomi R3600* firmware image to make sure
 
 The default root password is `password`. Please remember to login to the router and change that after the upgrade. Your router settings like IP address and SSIDs are stored in the nvram and should stay the same.
 
+The script also tries its best to remove or disable phone-home binaries, and also the smart controller (AIoT) parts, leaving you with a (close to) OpenWRT router that you can configure via UCI or `/etc/config`.
+
 Note that in order to get SSH access to the router initially, you need to [downgrade to version 1.0.17 and exploit it first](https://forum.openwrt.org/t/adding-openwrt-support-for-ax3600/55049/123).
 Once you have SSH, you can use this repacking method to maintain SSH access for newer versions.
 

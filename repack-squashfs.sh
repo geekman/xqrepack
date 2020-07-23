@@ -27,6 +27,8 @@ rm -f "$FSDIR/foo"
 >&2 echo "unpacking squashfs..."
 unsquashfs -f -d "$FSDIR" "$IMG"
 
+>&2 echo "patching squashfs..."
+
 # modify dropbear init
 sed -i 's/channel=.*/channel=release2/' "$FSDIR/etc/init.d/dropbear"
 
@@ -40,6 +42,22 @@ XQDEF
 
 # modify root password
 sed -i "s@root:[^:]*@root:${ROOTPW}@" "$FSDIR/etc/shadow"
+
+# dont start crap services
+for SVC in stat_points statisticsservice \
+		datacenter \
+		smartcontroller \
+		plugincenter plugin_start_script.sh cp_preinstall_plugins.sh; do
+	rm -f $FSDIR/etc/rc.d/[SK]*$SVC
+done
+
+# prevent stats phone home & auto-update
+for f in StatPoints mtd_crash_log logupload.lua otapredownload; do > $FSDIR/usr/sbin/$f; done
+
+# cron jobs are mostly non-OpenWRT stuff
+for f in $FSDIR/etc/crontabs/*; do
+	sed -i 's/^/#/' $f
+done
 
 >&2 echo "repacking squashfs..."
 rm -f "$IMG.new"
