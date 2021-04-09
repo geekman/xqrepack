@@ -33,6 +33,7 @@ unsquashfs -f -d "$FSDIR" "$IMG"
 sed -i 's/channel=.*/channel=release2/' "$FSDIR/etc/init.d/dropbear"
 
 # make sure our backdoors are always enabled by default
+sed -i '/ssh_en/d;' "$FSDIR/usr/share/xiaoqiang/xiaoqiang-reserved.txt"
 sed -i '/ssh_en=/d; /uart_en=/d; /boot_wait=/d;' "$FSDIR/usr/share/xiaoqiang/xiaoqiang-defaults.txt"
 cat <<XQDEF >> "$FSDIR/usr/share/xiaoqiang/xiaoqiang-defaults.txt"
 uart_en=1
