@@ -52,15 +52,27 @@ Usage
 5. Flash this file directly into the router using SSH.
    You cannot use the web UI because this is a raw image, and more importantly has no signature.
 
-   The R3600 firmware uses an A/B partition system, called `rootfs` and `rootfs_1`. This corresponds to `mtd12` and `mtd13`. Find the partition that is not the one in use and use `ubiformat` to write the raw image onto the partition:
+   If you are using a recently xqrepack'ed firmware, you can use the `xqflash` utility on the router to flash an update image:
 
-        ubiformat /dev/mtd12 -f /tmp/r3600-raw-img.bin -s 2048 -O 2048
+        xqflash /tmp/r3600-raw-img.bin
 
-6. Set the nvram variable to re-initialize `/etc` (and I think to switch partitions also):
+   After it completes successfully, you should be able to `reboot`.
 
-        nvram set flag_ota_reboot=1
-        nvram commit
-        reboot
+   If the `xqflash` utility is not available, you can manually flash the update image described in the following section.
+
+
+Manual Flashing
+================
+
+The R3600 firmware uses an A/B partition system, called `rootfs` and `rootfs_1`. This corresponds to `mtd12` and `mtd13`. Find the partition that is not the one in use and use `ubiformat` to write the raw image onto the partition:
+
+    ubiformat /dev/mtd12 -f /tmp/r3600-raw-img.bin -s 2048 -O 2048
+
+Set the nvram variable to re-initialize `/etc` (and I think to switch partitions also):
+
+    nvram set flag_ota_reboot=1
+    nvram commit
+    reboot
 
 
 A/B Partitions
@@ -89,7 +101,7 @@ License
 
 **xqrepack** is licensed under **the 3-clause ("modified") BSD License**.
 
-Copyright (C) 2020 Darell Tan
+Copyright (C) 2020-2021 Darell Tan
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

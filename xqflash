@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# flash a raw image into the upgrade slot
+# installed by the xqrepack tool for easy upgrading
+#
+
+. /lib/functions.sh
+
+include /lib/upgrade
+
+IMAGE="$1"
+
+[ -z "$IMAGE" ] && { echo "usage: $0 <ubi-image>"; exit 1; }
+
+[ -f "$IMAGE" ] || { echo "image file not found"; exit 2; }
+
+img_type=$(identify $IMAGE)
+[ "$img_type" = "ubi" ] || { echo "image file needs to be of type UBI, not \"$img_type\""; exit 2; }
+
+# determine partition
+r0_mtd=$(grep '"rootfs"'   /proc/mtd | awk -F: '{print substr($1,4)}')
+r1_mtd=$(grep '"rootfs_1"' /proc/mtd | awk -F: '{print substr($1,4)}')
+os_idx=$(nvram get flag_boot_rootfs)
+mtd_cur=$(($r0_mtd+${os_idx:-0}))
+mtd_nxt=$(($r0_mtd+$r1_mtd-$mtd_cur))
+
+MTD_DEV=/dev/mtd$mtd_nxt
+[ -c "$MTD_DEV" ] || { echo "unable to determine MTD partition to flash to: $MTD_DEV"; exit 2; }
+
+# abort if any command fails
+set -e
+
+echo "flashing $IMAGE onto $MTD_DEV..."
+ubiformat $MTD_DEV -f $IMAGE -s 2048 -O 2048
+
+echo "setting nvram variables..."
+nvram set flag_ota_reboot=1
+nvram commit
+
+echo "Done. You may reboot now."
+
