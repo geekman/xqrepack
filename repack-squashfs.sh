@@ -31,6 +31,7 @@ unsquashfs -f -d "$FSDIR" "$IMG"
 
 # modify dropbear init
 sed -i 's/channel=.*/channel=release2/' "$FSDIR/etc/init.d/dropbear"
+sed -i 's/flg_ssh=.*/flg_ssh=1/' "$FSDIR/etc/init.d/dropbear"
 
 # make sure our backdoors are always enabled by default
 sed -i '/ssh_en/d;' "$FSDIR/usr/share/xiaoqiang/xiaoqiang-reserved.txt"
@@ -40,6 +41,19 @@ uart_en=1
 ssh_en=1
 boot_wait=on
 XQDEF
+
+# always reset our access nvram variables
+grep -q -w enable_dev_access "$FSDIR/lib/preinit/31_restore_nvram" || \
+ cat <<NVRAM >> "$FSDIR/lib/preinit/31_restore_nvram"
+enable_dev_access() {
+	nvram set uart_en=1
+	nvram set ssh_en=1
+	nvram set boot_wait=on
+	nvram commit
+}
+
+boot_hook_add preinit_main enable_dev_access
+NVRAM
 
 # modify root password
 sed -i "s@root:[^:]*@root:${ROOTPW}@" "$FSDIR/etc/shadow"
