@@ -64,10 +64,16 @@ NVRAM
 # modify root password
 sed -i "s@root:[^:]*@root:${ROOTPW}@" "$FSDIR/etc/shadow"
 
+# stop phone-home in web UI
+cat <<JS >> "$FSDIR/www/js/miwifi-monitor.js"
+(function(){ if (typeof window.MIWIFI_MONITOR !== "undefined") window.MIWIFI_MONITOR.log = function(a,b) {}; })();
+JS
+
 # dont start crap services
 for SVC in stat_points statisticsservice \
 		datacenter \
 		smartcontroller \
+		wan_check \
 		plugincenter plugin_start_script.sh cp_preinstall_plugins.sh; do
 	rm -f $FSDIR/etc/rc.d/[SK]*$SVC
 done
