@@ -74,6 +74,12 @@ cp xqflash "$FSDIR/sbin"
 chmod 0755      "$FSDIR/sbin/xqflash"
 chown root:root "$FSDIR/sbin/xqflash"
 
+# add english language and set it as default
+cp base.en.lmo "$FSDIR/usr/lib/lua/luci/i18n"
+chmod 0755      "$FSDIR/usr/lib/lua/luci/i18n/base.en.lmo"
+chown root:root "$FSDIR/usr/lib/lua/luci/i18n/base.en.lmo"
+sed -i 's/option lang \x27cn\x27/option lang \x27en\x27/g' "$FSDIR/etc/config/luci"
+
 # dont start crap services
 for SVC in stat_points statisticsservice \
 		datacenter \
