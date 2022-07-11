@@ -1,0 +1,35 @@
+--- a/lib/wifi/hostapd.sh	2021-07-08 06:48:54.000000000 +0000
++++ b/lib/wifi/hostapd.sh	2022-07-11 07:56:12.751197169 +0000
+@@ -104,6 +104,8 @@
+ 	config_add_string country
+ 	config_add_boolean country_ie doth
+ 	config_add_int beacon_int
++
++	config_add_array hostapd_options
+ }
+ 
+ 
+@@ -137,6 +139,10 @@
+         [ -n "$brlist" ] && append base_cfg "basic_rates=$brlist" "$N"
+         [ -n "$beacon_int" ] && append base_cfg "beacon_int=$beacon_int" "$N"
+ 
++	local opts
++	json_get_values opts hostapd_options
++	for hopt in $opts; do append base_cfg "$hopt" "$N"; done
++
+         cat > "$config" <<EOF
+ driver=$driver
+ $base_cfg
+@@ -935,6 +941,12 @@
+ 
+ 	config_get_bool bss_transition "$vif" bss_transition
+ 	[ -n "$bss_transition" ] && append "$var" "bss_transition=$bss_transition" "$N"
++
++	add_hostapd_bss_option() {
++		append "$var" "${1}" "$N"
++	}
++	config_list_foreach "$vif" hostapd_bss_options add_hostapd_bss_option
++
+ 	return 0
+ }
+ 
