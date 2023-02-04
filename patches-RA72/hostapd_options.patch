@@ -1,0 +1,34 @@
+--- a/lib/wifi/hostapd.sh	2021-03-22 07:59:08.000000000 +0100
++++ b/lib/wifi/hostapd.sh	2022-12-15 19:51:25.284246204 +0100
+@@ -105,6 +105,8 @@
+ 	config_add_string country
+ 	config_add_boolean country_ie doth
+ 	config_add_int beacon_int
++	
++	config_add_array hostapd_options
+ }
+ 
+ 
+@@ -137,6 +139,10 @@
+         done
+         [ -n "$brlist" ] && append base_cfg "basic_rates=$brlist" "$N"
+         [ -n "$beacon_int" ] && append base_cfg "beacon_int=$beacon_int" "$N"
++        
++        local opts
++	json_get_values opts hostapd_options
++	for hopt in $opts; do append base_cfg "$hopt" "$N"; done
+ 
+         cat > "$config" <<EOF
+ driver=$driver
+@@ -1066,6 +1072,11 @@
+ 
+ 	config_get_bool bss_transition "$vif" bss_transition
+ 	[ -n "$bss_transition" ] && append "$var" "bss_transition=$bss_transition" "$N"
++	
++	add_hostapd_bss_option() {
++		append "$var" "${1}" "$N"
++	}
++	config_list_foreach "$vif" hostapd_bss_options add_hostapd_bss_option
+ 
+ 	# MapBSSType can have following bits set
+ 	# backhaul BSS BIT(6)

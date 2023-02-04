@@ -1,0 +1,17 @@
+patch to stop disabling the IoT interface, thanks to Mel:
+https://forum.openwrt.org/t/xiaomi-ax3600-int-wifi/74276/523
+
+-----
+--- a/lib/wifi/qcawificfg80211.sh	2021-03-22 07:59:08.000000000 +0100
++++ b/lib/wifi/qcawificfg80211.sh	2022-12-15 19:52:58.024247590 +0100
+@@ -4355,9 +4355,7 @@
+ 
+ 	config_get CSwOpts "$device" CSwOpts
+ 	[ -n "$CSwOpts" ] && "$device_if" "$phy" CSwOpts "${CSwOpts}"
+-	if [ $ifname = "wl2" ]; then
+-		ifconfig $ifname down
+-	fi
++	
+ 
+ 	local netmode=$(uci -q get xiaoqiang.common.NETMODE)
+ 	if [ -n "$netmode" ] && [ "$netmode" = "whc_re" ]; then
